@@ -201,4 +201,78 @@ trainer.train()
 
  #######
 
+###TBA TEST is missing
+
+#########
+
+#### BERTweet Visualization
+
+from transformers import AutoModelForSequenceClassification
+
+# Load the fine-tuned model
+fine_tuned_model = AutoModelForSequenceClassification.from_pretrained("/content/drive/MyDrive/Colab Notebooks/Project_Irony_Detection/BERTweet_optuna_model_trainer/checkpoint-32")
+
+# Tokenize the validation set
+#model_inputs = tokenizer(small_tokenized_dataset['val']['text'], truncation=False, padding=True, return_tensors='pt')
+model_inputs = tokenizer(small_tokenized_dataset['val']['text'], padding=True, truncation=True, return_tensors='pt')
+
+# Get the outputs with hidden states
+outputs = fine_tuned_model(**model_inputs, output_hidden_states=True)
+#with torch.no_grad():
+#  outputs = model(**model_inputs, output_hidden_states=True) # new line tba?
+
+
+### do i need this? # Ensure model and inputs are on the same device (e.g., GPU)
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#fine_tuned_model.to(device)
+#model_inputs = model_inputs.to(device)
+
+
+
+#######
+
+###Completely new - does it work?
+
+# Path to save the embedding visualizations
+path = "/content/drive/MyDrive/Colab Notebooks/Project_Irony_Detection/BERTweet_results_vis_2"  # stored in: results - layer - 0000 - default  - we need the two tsv files - download - load in project tensor flow (first load tensors, then metadata)
+# Path to save the visualizations
+
+if not os.path.exists(path):
+    os.mkdir(path)  # Create the directory if it doesn't exist
+
+layer = 0
+
+while layer in range(len(outputs.hidden_states)):
+    layer_path = os.path.join(path, f'layer_{layer}')
+
+    if not os.path.exists(layer_path):
+        os.mkdir(layer_path)  # Create layer directory if it doesn't exist
+
+    tensors = []
+    labels = []
+
+    for i in range(len(outputs.hidden_states[layer])):
+        sp_token_position = 0
+
+        for token in model_inputs['input_ids'][i]:
+            if token != tokenizer.cls_token_id:  # Adjust based on CLS token ID
+                sp_token_position += 1
+            else:
+                tensor = outputs.hidden_states[layer][i][sp_token_position]
+                tensors.append(tensor)
+                break
+
+        label = [small_tokenized_dataset['val']['text'][i], str(small_tokenized_dataset['val']['label'][i])]
+        labels.append(label)
+
+    if tensors:
+        writer = SummaryWriter(layer_path)
+        writer.add_embedding(torch.stack(tensors), metadata=labels, metadata_header=['text', 'label'])
+        writer.close()
+        print(f"Embeddings for layer {layer} added to TensorBoard.")
+    else:
+        print(f"No tensors to stack for layer {layer}.")
+
+    layer += 1
+
 
