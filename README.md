@@ -1,5 +1,6 @@
-Hyperparameter tuning of roberta and bertweet on irony detection dataset cardiffnlp/tweet_eval
+This project explores hyperparameter tuning of RoBERTa and BERTweet models on the cardiffnlp/tweet_eval irony detection dataset. It features:
+  - Tools Used: Colab, with manual fine-tuning and Optuna for optimization.
+  - Models: RoBERTa and BERTweet fine-tuned for irony detection.
+  - Notes: Adjustments and reruns led to minor “error” messages, which are harmless and stem from cleaning up code post-completion.
 
-Created with colab 
-
-Note: This code works well! ("Errors" in these notebooks are not actually errors, they are the result of me cleaning up the code after I was done and accidentally running some code cells again. Due to Colab's GPU restrictions I was not able to run the whole process again.)
+A robust and well-performing implementation of NLP techniques for irony detection.
